@@ -106,8 +106,8 @@ foreach my $line (@runningTotal) {
     $sum      = $sum + $size;
     $countPid = $countPid + $count;
 }
-print "\nTotal in Collection: $pidCounter";
-print "\nTotal Collection Size: ";
+print "\nCollection $collectionPid Totals\n\n  Fedora Objects: $pidCounter";
+print "\n  Space Used: ";
    if ( $sum > 1024 * 1024 * 1024 * 1024 ) {
         my $humanSize = $sum / 1024 / 1024 / 1024 / 1024;
         my $rounded = sprintf "%.3f", $humanSize;  # rounded to 2 decimal places
@@ -131,4 +131,4 @@ print "\nTotal Collection Size: ";
     else {
         print "$sum bytes\n";
     }
-print "\nTotal Collection Datastreams: $countPid\n";
+print "  Number of Datastreams: $countPid\n";
