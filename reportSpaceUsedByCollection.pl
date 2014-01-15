@@ -12,8 +12,9 @@ if ( $#ARGV != 0 ) {
     exit(8);
 }
 
+#TODO add comments
+#TODO check if item in collection is a collection
 #TODO report nested collection space used
-#TODO 
 
 my $collectionPid = $ARGV[0];
 chomp $collectionPid;
@@ -55,7 +56,7 @@ my $resultsCollection = $stylesheetCollection->transform($xmlCollection);
 my $outputCollection = $stylesheetCollection->output_string($resultsCollection);
 
 chomp $outputCollection;
-print "$outputCollection\n";
+#print "$outputCollection\n";       # uncomment for verbose report
 my @runningTotal;
 push( @runningTotal, $outputCollection );
 
@@ -95,7 +96,7 @@ foreach my $line (@sortedPidsInCollection) {
     my $output     = $stylesheet->output_string($results);
 
     chomp $output;
-    print "$output\n";
+#   print "$output\n";      # uncomment for verbose report
     push( @runningTotal, $output );
 }
 my ( $pidCounter, $sum, $countPid );
@@ -106,5 +107,28 @@ foreach my $line (@runningTotal) {
     $countPid = $countPid + $count;
 }
 print "\nTotal in Collection: $pidCounter";
-print "\nTotal Collection Size: $sum";
+print "\nTotal Collection Size: ";
+   if ( $sum > 1024 * 1024 * 1024 * 1024 ) {
+        my $humanSize = $sum / 1024 / 1024 / 1024 / 1024;
+        my $rounded = sprintf "%.3f", $humanSize;  # rounded to 2 decimal places
+        print "$rounded TB\n";
+    }
+    elsif ( $sum > 1024 * 1024 * 1024 ) {
+        my $humanSize = $sum / 1024 / 1024 / 1024;
+        my $rounded = sprintf "%.3f", $humanSize;  # rounded to 2 decimal places
+        print "$rounded GB\n";
+    }
+    elsif ( $sum > 1024 * 1024 ) {
+        my $humanSize = $sum / 1024 / 1024;
+        my $rounded = sprintf "%.3f", $humanSize;  # rounded to 2 decimal places
+        print "$rounded MB\n";
+    }
+    elsif ( $sum > 1024 ) {
+        my $humanSize = $sum / 1024;
+        my $rounded = sprintf "%.3f", $humanSize;  # rounded to 2 decimal places
+        print "$rounded KB\n";
+    }
+    else {
+        print "$sum bytes\n";
+    }
 print "\nTotal Collection Datastreams: $countPid\n";
