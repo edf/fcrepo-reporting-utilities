@@ -19,18 +19,17 @@ if ( $#ARGV != 0 ) {
 my $collectionPid = $ARGV[0];
 chomp $collectionPid;
 
-## local settings to configure
-#       variables of fedora server, port, username, and password
-my $ServerName    = "http://fedora.coalliance.org";
-my $ServerPort    = "8080";
-my $fedoraContext = "fedora";
-my $fedoraURI     = $ServerName . ":" . $ServerPort . "/" . $fedoraContext . "/objects";
-
-my $UserName = "fedoraAdmin";
-my $PassWord = 'PASSWORD';
+my ($ServerName,$ServerPort,$fedoraContext,$UserName,$PassWord);          # local settings 
+my $configFile = "settings.config";
+open my $configFH, "<", "$configFile" or die "\n\n   Program $0 stopping, couldn't open the configuration file '$configFile' $!.\n\n";
+    my $config = join "", <$configFH>;                                    # print "\n$config\n";
+    close $configFH;
+eval $config;
+die "Couldn't interpret the configuration file ($configFile) that was given.\nError details follow: $@\n" if $@;
+my $fedoraURI = $ServerName . ":" . $ServerPort . "/" . $fedoraContext;
 
 ## calculate space used by collection PID
-my $collectionFoxml = qx(curl -s -u ${UserName}:$PassWord -X GET "$fedoraURI/$collectionPid/objectXML");      #print $collectionFoxml;
+my $collectionFoxml = qx(curl -s -u ${UserName}:$PassWord -X GET "$fedoraURI/objects/$collectionPid/objectXML");      #print $collectionFoxml;
 
 my $sizeCalc = q(
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -71,7 +70,7 @@ my $pidNumberCollectionSearchString = 'select $object from <#ri> where ($object 
   . 'BasicCollection> order by $object ';
 my $pidNumberCollectionSearchStringEncode = uri_escape($pidNumberCollectionSearchString);
 my @pidNumberCollectionSearchStringEncodeCurlCommand =
- `curl -s 'http://fedora.coalliance.org:8080/fedora/risearch?type=tuples&lang=itql&format=CSV&dt=on&query=$pidNumberCollectionSearchStringEncode'`;
+ `curl -s '$fedoraURI/risearch?type=tuples&lang=itql&format=CSV&dt=on&query=$pidNumberCollectionSearchStringEncode'`;
 my @pidsInCollection;
 foreach my $line (@pidNumberCollectionSearchStringEncodeCurlCommand) {
     next if $line =~ m#^"object"#;
@@ -85,7 +84,7 @@ my @sortedPidsInCollection = sort { $a <=> $b; } @pidsInCollection;
 foreach my $line (@sortedPidsInCollection) {
     chomp $line;
     my $pid = $nameSpace . ":" . $line; #    print "$pid\n";
-    my $foxml = qx(curl -s -u ${UserName}:$PassWord -X GET "$fedoraURI/$pid/objectXML");
+    my $foxml = qx(curl -s -u ${UserName}:$PassWord -X GET "$fedoraURI/objects/$pid/objectXML");
     my $xml_parser  = XML::LibXML->new;
     my $xslt_parser = XML::LibXSLT->new;
 
