@@ -6,16 +6,19 @@ use strict;
 use warnings;
 use URI::Escape;
 use LWP::Simple;
+use Config::Tiny
 
 print "Content-Type: text/html\n\n";
-my ($ServerName,$ServerPort,$fedoraContext,$UserName,$PassWord);          # local settings 
-my $configFile = "settings.config";
-open my $configFH, "<", "$configFile" or die "\n\n   Program $0 stopping, couldn't open the configuration file '$configFile' $!.\n\n";
-    my $config = join "", <$configFH>;                                    # print "\n$config\n";
-    close $configFH;
-eval $config;
-die "Couldn't interpret the configuration file ($configFile) that was given.\nError details follow: $@\n" if $@;
-my $fedoraURI = $ServerName . ":" . $ServerPort . "/" . $fedoraContext;   # print "$fedoraURI\n";
+
+my $config = Config::Tiny->new;
+$config = Config::Tiny->read('settings.config');
+my $ServerName = $config->{settings}->{ServerName};
+my $ServerPort = $config->{settings}->{ServerPort};
+my $fedoraContext = $config->{settings}->{fedoraContext};
+my $UserName = $config->{settings}->{UserName};
+my $PassWord = $config->{settings}->{PassWord};
+
+my $fedoraURI = $ServerName . ":" . $ServerPort . "/" . $fedoraContext;
 
 my $file      = "header.html";
 my $headerDoc = do {
