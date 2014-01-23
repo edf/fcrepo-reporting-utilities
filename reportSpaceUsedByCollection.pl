@@ -6,6 +6,7 @@ no warnings qw(uninitialized);
 use URI::Escape;
 use XML::LibXSLT;
 use XML::LibXML;
+use Config::Tiny;
 
 if ( $#ARGV != 0 ) {
     print "\n Usage is $0 <collection pid> \n\n";
@@ -19,13 +20,14 @@ if ( $#ARGV != 0 ) {
 my $collectionPid = $ARGV[0];
 chomp $collectionPid;
 
-my ($ServerName,$ServerPort,$fedoraContext,$UserName,$PassWord);          # local settings 
-my $configFile = "settings.config";
-open my $configFH, "<", "$configFile" or die "\n\n   Program $0 stopping, couldn't open the configuration file '$configFile' $!.\n\n";
-    my $config = join "", <$configFH>;                                    # print "\n$config\n";
-    close $configFH;
-eval $config;
-die "Couldn't interpret the configuration file ($configFile) that was given.\nError details follow: $@\n" if $@;
+my $config = Config::Tiny->new;
+$config = Config::Tiny->read('settings.config');
+my $ServerName = $config->{settings}->{ServerName};
+my $ServerPort = $config->{settings}->{ServerPort};
+my $fedoraContext = $config->{settings}->{fedoraContext};
+my $UserName = $config->{settings}->{UserName};
+my $PassWord = $config->{settings}->{PassWord};
+
 my $fedoraURI = $ServerName . ":" . $ServerPort . "/" . $fedoraContext;
 
 ## calculate space used by collection PID
