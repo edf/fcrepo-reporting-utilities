@@ -9,9 +9,9 @@ Utilities for generating reports about a Fedora Repository:
 
 ## Requirements
 
-Config::Tiny
-
-`cpanm Config::Tiny`
+* libxml-libxslt-perl: `sudo apt-get install libxml-libxslt-perl`
+* XML::LibXSLT: `sudo cpanm XML::LibXSLT`
+* Config::Tiny: `sudo cpanm Config::Tiny`
 
 Copy `settings.sample` to `setting.config` and set variables.
 

@@ -28,6 +28,13 @@ my $fedoraContext = $config->{settings}->{fedoraContext};
 my $UserName = $config->{settings}->{UserName};
 my $PassWord = $config->{settings}->{PassWord};
 
+print "WHAT THE SHIT PERL?";
+print "$ServerName";
+print "$ServerPort";
+print "$fedoraContext";
+print "$UserName";
+print "$PassWord";
+
 my $fedoraURI = $ServerName . ":" . $ServerPort . "/" . $fedoraContext;
 
 ## calculate space used by collection PID
