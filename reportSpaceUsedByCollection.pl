@@ -22,23 +22,16 @@ chomp $collectionPid;
 
 my $config = Config::Tiny->new;
 $config = Config::Tiny->read('settings.config');
-my $ServerName = $config->{settings}->{ServerName};
-my $ServerPort = $config->{settings}->{ServerPort};
-my $fedoraContext = $config->{settings}->{fedoraContext};
-my $UserName = $config->{settings}->{UserName};
-my $PassWord = $config->{settings}->{PassWord};
+my $server_name = $config->{settings}->{server_name};
+my $port = $config->{settings}->{port};
+my $fedora_context = $config->{settings}->{fedora_context};
+my $username = $config->{settings}->{username};
+my $password = $config->{settings}->{password};
 
-print "WHAT THE SHIT PERL?";
-print "$ServerName";
-print "$ServerPort";
-print "$fedoraContext";
-print "$UserName";
-print "$PassWord";
-
-my $fedoraURI = $ServerName . ":" . $ServerPort . "/" . $fedoraContext;
+my $fedoraURI = $server_name . ":" . $port . "/" . $fedora_context;
 
 ## calculate space used by collection PID
-my $collectionFoxml = qx(curl -s -u ${UserName}:$PassWord -X GET "$fedoraURI/objects/$collectionPid/objectXML");      #print $collectionFoxml;
+my $collectionFoxml = qx(curl -s -u ${username}:$password -X GET "$fedoraURI/objects/$collectionPid/objectXML");      #print $collectionFoxml;
 
 my $sizeCalc = q(
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -93,7 +86,7 @@ my @sortedPidsInCollection = sort { $a <=> $b; } @pidsInCollection;
 foreach my $line (@sortedPidsInCollection) {
     chomp $line;
     my $pid = $nameSpace . ":" . $line; #    print "$pid\n";
-    my $foxml = qx(curl -s -u ${UserName}:$PassWord -X GET "$fedoraURI/objects/$pid/objectXML");
+    my $foxml = qx(curl -s -u ${username}:$password -X GET "$fedoraURI/objects/$pid/objectXML");
     my $xml_parser  = XML::LibXML->new;
     my $xslt_parser = XML::LibXSLT->new;
 

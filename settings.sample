@@ -1,6 +1,6 @@
-## local settings to configure
-my $ServerName    = "http://your_FQDN_here";
-my $ServerPort    = "8080";
-my $fedoraContext = "fedora";
-my $UserName      = "fedoraAdmin";
-my $PassWord      = 'PASSWORD';
+[settings]
+server_name    = "http://your_FQDN_here";
+port           = "8080";
+fedora_context = "fedora";
+username       = "fedoraAdmin";
+password       = 'PASSWORD';
