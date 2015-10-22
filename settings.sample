@@ -1,7 +1,7 @@
 [settings]
-## local settings to configure
-ServerName     = http://your_FQDN_here
-ServerPort     = 8080
-fedoraContext  = fedora
-UserName       = fedoraAdmin
-PassWord       = PASSWORD
+<<<<<<< HEAD
+server_name    = http://your_FQDN_here
+port           = 8080
+fedora_context = fedora
+username       = fedoraAdmin
+password       = PASSWORD

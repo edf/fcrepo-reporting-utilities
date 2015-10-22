@@ -7,6 +7,7 @@ use URI::Escape;
 use XML::LibXSLT;
 use XML::LibXML;
 use Config::Tiny;
+use Data::Dump;
 
 if ( $#ARGV != 0 ) {
     print "\n Usage is $0 <collection pid> \n\n";
@@ -22,16 +23,16 @@ chomp $collectionPid;
 
 my $config = Config::Tiny->new;
 $config = Config::Tiny->read('settings.config');
-my $ServerName = $config->{settings}->{ServerName};
-my $ServerPort = $config->{settings}->{ServerPort};
-my $fedoraContext = $config->{settings}->{fedoraContext};
-my $UserName = $config->{settings}->{UserName};
-my $PassWord = $config->{settings}->{PassWord};
+my $server_name = $config->{settings}->{server_name};
+my $port = $config->{settings}->{port};
+my $fedora_context = $config->{settings}->{fedora_context};
+my $username = $config->{settings}->{username};
+my $password = $config->{settings}->{password};
 
-my $fedoraURI = $ServerName . ":" . $ServerPort . "/" . $fedoraContext;
+my $fedoraURI = $server_name . ":" . $port . "/" . $fedora_context;
 
 ## calculate space used by collection PID
-my $collectionFoxml = qx(curl -s -u ${UserName}:$PassWord -X GET "$fedoraURI/objects/$collectionPid/objectXML");      #print $collectionFoxml;
+my $collectionFoxml = qx(curl -s -u ${username}:$password -X GET "$fedoraURI/objects/$collectionPid/objectXML");      #print $collectionFoxml;
 
 my $sizeCalc = q(
 <xsl:stylesheet xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
@@ -62,17 +63,17 @@ my @runningTotal;
 push( @runningTotal, $outputCollection );
 
 my ( $nameSpace, $pidNumber ) = split( /:/, $collectionPid );
-##  get members of collection from ITQL query
-my $pidNumberCollectionSearchString = 'select $object from <#ri> where ($object <fedora-rels-ext:isMemberOf> <info:fedora/'
+##  get members of collection from SPARQL query
+my $pidNumberCollectionSearchString = 'select $object from <#ri> where {{ $object <fedora-rels-ext:isMemberOf> <info:fedora/'
   . $nameSpace . ':' . $pidNumber
-  . '> or $object <fedora-rels-ext:isMemberOfCollection> <info:fedora/'
+  . '> . } UNION { $object <fedora-rels-ext:isMemberOfCollection> <info:fedora/'
   . $nameSpace . ':' . $pidNumber
-  . '> ) minus $object <fedora-model:hasModel> <info:fedora/'
-  . $nameSpace . ':' . $nameSpace
-  . 'BasicCollection> order by $object ';
+  . '> . } UNION { $book <fedora-rels-ext:isMemberOfCollection> <info:fedora/'
+  . $nameSpace . ':' . $pidNumber
+  . '> . $object <fedora-rels-ext:isMemberOf> $book . }} order by $object ';
 my $pidNumberCollectionSearchStringEncode = uri_escape($pidNumberCollectionSearchString);
-my @pidNumberCollectionSearchStringEncodeCurlCommand =
- `curl -s '$fedoraURI/risearch?type=tuples&lang=itql&format=CSV&dt=on&query=$pidNumberCollectionSearchStringEncode'`;
+my $query_uri = $fedoraURI . '/risearch?type=tuples&lang=sparql&format=CSV&dt=on&query=' .$pidNumberCollectionSearchStringEncode;
+my @pidNumberCollectionSearchStringEncodeCurlCommand = `curl -s '$query_uri'`;
 my @pidsInCollection;
 foreach my $line (@pidNumberCollectionSearchStringEncodeCurlCommand) {
     next if $line =~ m#^"object"#;
@@ -86,7 +87,7 @@ my @sortedPidsInCollection = sort { $a <=> $b; } @pidsInCollection;
 foreach my $line (@sortedPidsInCollection) {
     chomp $line;
     my $pid = $nameSpace . ":" . $line; #    print "$pid\n";
-    my $foxml = qx(curl -s -u ${UserName}:$PassWord -X GET "$fedoraURI/objects/$pid/objectXML");
+    my $foxml = qx(curl -s -u ${username}:$password -X GET "$fedoraURI/objects/$pid/objectXML");
     my $xml_parser  = XML::LibXML->new;
     my $xslt_parser = XML::LibXSLT->new;
 
@@ -97,7 +98,7 @@ foreach my $line (@sortedPidsInCollection) {
     my $output     = $stylesheet->output_string($results);
 
     chomp $output;
-#   print "$output\n";      # uncomment for verbose report
+    #print "$output\n";      # uncomment for verbose report
     push( @runningTotal, $output );
 }
 my ( $pidCounter, $sum, $countPid );
