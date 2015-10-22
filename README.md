@@ -37,6 +37,10 @@ Collection yul:F0433 Totals
   Number of Datastreams: 85485
 ```
 
+## Quick way to get count of all Fedora Objects 
+
+`curl -s "http://fedora:8080/solr/select?q=*:*&fl=*" | tidy -xml -wrap 0 2>/dev/null | grep numFound`
+
 ## Note
 
 Communication is in the clear to the FCRepo server. We have protect our reporting and FCRepo servers behind a firewall. Your mileage will vary.

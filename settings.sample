@@ -1,4 +1,5 @@
 [settings]
+<<<<<<< HEAD
 server_name    = http://your_FQDN_here
 port           = 8080
 fedora_context = fedora
